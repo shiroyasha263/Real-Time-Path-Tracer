@@ -1,0 +1,4 @@
+# CMake generation dependency list for this directory.
+C:/Users/Vishu/Downloads/Real Time Path Tracer/Build/optixPipeline/CMakeFiles/optixPipeline.dir/optixPipeline_generated_devicePrograms.cu.optixir.depend
+C:/Users/Vishu/Downloads/Real Time Path Tracer/SDK/CMake/FindCUDA/run_nvcc.cmake
+C:/Users/Vishu/Downloads/Real Time Path Tracer/SDK/optixPipeline/CMakeLists.txt

@@ -1,0 +1,146 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="16.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\SDK\sutil\Camera.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\SDK\sutil\GLDisplay.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\SDK\sutil\PPMLoader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\SDK\sutil\Scene.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\SDK\sutil\sutil.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\SDK\sutil\Trackball.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\Build\sampleConfig.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\SDK\cuda\BufferView.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\SDK\cuda\GeometryData.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\SDK\cuda\Light.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\SDK\cuda\LocalGeometry.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\SDK\cuda\MaterialData.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\SDK\cuda\util.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\SDK\cuda\helpers.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\SDK\sutil\Aabb.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\SDK\sutil\Camera.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\SDK\sutil\CuBuffer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\SDK\sutil\CUDAOutputBuffer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\SDK\sutil\Exception.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\SDK\sutil\GLDisplay.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\SDK\sutil\Matrix.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\SDK\sutil\PPMLoader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\SDK\sutil\Preprocessor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\SDK\sutil\Quaternion.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\SDK\sutil\Record.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\SDK\sutil\Scene.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\SDK\sutil\sutilapi.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\SDK\sutil\sutil.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\SDK\sutil\Trackball.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\SDK\sutil\vec_math.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\SDK\cuda\camera.cu">
+      <Filter>CUDA Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\SDK\cuda\geometry.cu">
+      <Filter>CUDA Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\SDK\cuda\shading.cu">
+      <Filter>CUDA Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\SDK\cuda\sphere.cu">
+      <Filter>CUDA Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\SDK\cuda\whitted.cu">
+      <Filter>CUDA Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\SDK\sutil\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\Build\lib\ptx\$(Configuration)\sutil_generated_camera.cu.optixir">
+      <Filter>OptixIR Files</Filter>
+    </None>
+    <None Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\Build\lib\ptx\$(Configuration)\sutil_generated_geometry.cu.optixir">
+      <Filter>OptixIR Files</Filter>
+    </None>
+    <None Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\Build\lib\ptx\$(Configuration)\sutil_generated_shading.cu.optixir">
+      <Filter>OptixIR Files</Filter>
+    </None>
+    <None Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\Build\lib\ptx\$(Configuration)\sutil_generated_sphere.cu.optixir">
+      <Filter>OptixIR Files</Filter>
+    </None>
+    <None Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\Build\lib\ptx\$(Configuration)\sutil_generated_whitted.cu.optixir">
+      <Filter>OptixIR Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CUDA Files">
+      <UniqueIdentifier>{79695628-640A-31E6-95C4-96CDE5789A8B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{963DA190-0F6F-3AD6-9365-197C9EFFC834}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="OptixIR Files">
+      <UniqueIdentifier>{96E756D9-7E4F-37AF-9745-195B1767EC3F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{3824321B-DF81-3458-A1D1-F94673821B85}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

@@ -1,0 +1,8 @@
+# CMake generation dependency list for this directory.
+C:/Users/Vishu/Downloads/Real Time Path Tracer/Build/sutil/CMakeFiles/sutil.dir/__/cuda/sutil_generated_camera.cu.optixir.depend
+C:/Users/Vishu/Downloads/Real Time Path Tracer/Build/sutil/CMakeFiles/sutil.dir/__/cuda/sutil_generated_geometry.cu.optixir.depend
+C:/Users/Vishu/Downloads/Real Time Path Tracer/Build/sutil/CMakeFiles/sutil.dir/__/cuda/sutil_generated_shading.cu.optixir.depend
+C:/Users/Vishu/Downloads/Real Time Path Tracer/Build/sutil/CMakeFiles/sutil.dir/__/cuda/sutil_generated_sphere.cu.optixir.depend
+C:/Users/Vishu/Downloads/Real Time Path Tracer/Build/sutil/CMakeFiles/sutil.dir/__/cuda/sutil_generated_whitted.cu.optixir.depend
+C:/Users/Vishu/Downloads/Real Time Path Tracer/SDK/CMake/FindCUDA/run_nvcc.cmake
+C:/Users/Vishu/Downloads/Real Time Path Tracer/SDK/sutil/CMakeLists.txt
