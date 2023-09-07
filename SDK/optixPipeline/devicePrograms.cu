@@ -77,5 +77,5 @@ extern "C" __global__ void __raygen__renderFrame()
     
     // and write to frame buffer ...
     const uint32_t fbIndex = ix + iy * optixLaunchParams.width;
-    optixLaunchParams.image[fbIndex] = make_uchar4(0, 0, 0, 0);
+    optixLaunchParams.image[fbIndex] = make_uchar4(r, g, b, 255u);
 }

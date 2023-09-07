@@ -1,3 +1,4 @@
+#pragma once
 #include "CUDABuffer.h"
 #include "LaunchParams.h"
 
@@ -15,7 +16,21 @@ public:
 
 	void Resize(const unsigned int width, const unsigned int height);
 
-	void downloadPixels();
+	void downloadPixels(uchar4* h_pixels);
+
+	unsigned int getWidth() {
+		return launchParams.width;
+	}
+
+	unsigned int getHeight() {
+		return launchParams.height;
+	}
+
+	CUstream getStream() {
+		return stream;
+	}
+
+	void updateParams();
 
 protected:
 	void InitOptix();
@@ -56,8 +71,9 @@ protected:
 	CUDABuffer hitgroupRecordsBuffer;
 	OptixShaderBindingTable sbt = {};
 
-	LaunchParams launchParams;
 	CUDABuffer launchParamsBuffer;
 
 	CUDABuffer colorBuffer;
+public:
+	LaunchParams launchParams;
 };

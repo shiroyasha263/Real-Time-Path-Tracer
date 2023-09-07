@@ -264,4 +264,36 @@ void SampleRenderer::buildSBT() {
 	sbt.hitgroupRecordCount = (int)hitgroupRecords.size();
 }
 
-void SampleRenderer::Render()
+void SampleRenderer::Render() {
+	if (launchParams.width == 0) return;
+
+	launchParamsBuffer.upload(&launchParams, 1);
+	launchParams.frameID++;
+
+	OPTIX_CHECK(optixLaunch(
+							pipeline, stream,
+							launchParamsBuffer.d_pointer(),
+							launchParamsBuffer.sizeInBytes,
+							&sbt,
+							launchParams.width,
+							launchParams.height,
+							1));
+	CUDA_SYNC_CHECK();
+}
+
+void SampleRenderer::Resize(const unsigned int width, const unsigned int height) {
+	if (width == 0 || height == 0) return;
+
+	colorBuffer.resize(width * height * sizeof(uchar4));
+	launchParams.width = width;
+	launchParams.height = height;
+	launchParams.image = (uchar4*)colorBuffer.d_pointer();
+}
+
+void SampleRenderer::updateParams() {
+
+}
+
+void SampleRenderer::downloadPixels(uchar4* h_pixels) {
+	colorBuffer.download(h_pixels, launchParams.width * launchParams.height);
+}
