@@ -26,19 +26,10 @@ struct DisplayWindow {
     /*! callback that window got resized */
     void resize(unsigned int width, unsigned int height) { 
         /* empty - to be subclassed by user */
-        sample.Resize(width, height);
+        launchParams.width = width;
+        launchParams.height = height;
+        sample.updateParams(launchParams);
     }
-
-    void key(int key, int mods)
-    {}
-
-    /*! callback that window got resized */
-    void mouseMotion(const int2& newPos)
-    {}
-
-    /*! callback that window got resized */
-    void mouseButton(int button, int action, int mods)
-    {}
 
     inline int2 getMousePos() const
     {
@@ -46,6 +37,16 @@ struct DisplayWindow {
         glfwGetCursorPos(handle, &x, &y);
         return make_int2((int)x, (int)y);
     }
+
+    void mouseButtonCB(int button, int action, double xpos, double ypos);
+
+    void cursorPosCB(double xpos, double ypos);
+
+    void windowSizeCB(unsigned int res_x, unsigned int res_y);
+
+    void scrollCB(double yscroll);
+
+    void initCameraState();
 
     /*! re-render the frame - typically part of draw(), but we keep
       this a separate function so render() can focus on optix
@@ -58,7 +59,28 @@ struct DisplayWindow {
       gets closed */
     void run();
 
+    void initWinParams() {
+        resize_dirty = false;
+
+        // Camera state
+        camera_changed = true;
+
+        // Mouse state
+        mouse_button = -1;
+    }
+
     /*! the glfw window handle */
     GLFWwindow* handle{ nullptr };
+    LaunchParams launchParams;
     SampleRenderer sample;
+
+    bool resize_dirty;
+
+    // Camera state
+    bool             camera_changed;
+    sutil::Camera    camera;
+    sutil::Trackball trackball;
+
+    // Mouse state
+    int32_t mouse_button;
 };

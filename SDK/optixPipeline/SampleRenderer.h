@@ -18,19 +18,11 @@ public:
 
 	void downloadPixels(uchar4* h_pixels);
 
-	unsigned int getWidth() {
-		return launchParams.width;
-	}
-
-	unsigned int getHeight() {
-		return launchParams.height;
-	}
-
 	CUstream getStream() {
 		return stream;
 	}
 
-	void updateParams();
+	void updateParams(LaunchParams launchParams);
 
 protected:
 	void InitOptix();
@@ -74,6 +66,6 @@ protected:
 	CUDABuffer launchParamsBuffer;
 
 	CUDABuffer colorBuffer;
-public:
+	CUDABuffer accumBuffer;
 	LaunchParams launchParams;
 };

@@ -281,17 +281,13 @@ void SampleRenderer::Render() {
 	CUDA_SYNC_CHECK();
 }
 
-void SampleRenderer::Resize(const unsigned int width, const unsigned int height) {
-	if (width == 0 || height == 0) return;
+void SampleRenderer::updateParams(LaunchParams params) {
+	if (params.width == 0 || params.height == 0) return;
 
-	colorBuffer.resize(width * height * sizeof(uchar4));
-	launchParams.width = width;
-	launchParams.height = height;
+	colorBuffer.resize(params.width * params.height * sizeof(uchar4));
+	launchParams.width = params.width;
+	launchParams.height = params.height;
 	launchParams.image = (uchar4*)colorBuffer.d_pointer();
-}
-
-void SampleRenderer::updateParams() {
-
 }
 
 void SampleRenderer::downloadPixels(uchar4* h_pixels) {

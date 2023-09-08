@@ -1,15 +1,8 @@
 #include "DisplayWindow.h"
+#include <vector_types.h>
+#include <sutil/vec_math.h>
 
-bool resize_dirty = false;
 bool minimized = false;
-
-// Camera state
-bool             camera_changed = true;
-sutil::Camera    camera;
-sutil::Trackball trackball;
-
-// Mouse state
-int32_t mouse_button = -1;
 
 //------------------------------------------------------------------------------
 //
@@ -19,37 +12,44 @@ int32_t mouse_button = -1;
 
 static void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
 {
-    //double xpos, ypos;
-    //glfwGetCursorPos(window, &xpos, &ypos);
-    //
-    //if (action == GLFW_PRESS)
-    //{
-    //    mouse_button = button;
-    //    trackball.startTracking(static_cast<int>(xpos), static_cast<int>(ypos));
-    //}
-    //else
-    //{
-    //    mouse_button = -1;
-    //}
+    double xpos, ypos;
+    glfwGetCursorPos(window, &xpos, &ypos);
+    DisplayWindow* display = static_cast<DisplayWindow*>(glfwGetWindowUserPointer(window));
+    display->mouseButtonCB(button, action, xpos, ypos);
+}
+
+void DisplayWindow::mouseButtonCB(int button, int action, double xpos, double ypos) {
+    if (action == GLFW_PRESS)
+    {
+        mouse_button = button;
+        trackball.startTracking(static_cast<int>(xpos), static_cast<int>(ypos));
+    }
+    else
+    {
+        mouse_button = -1;
+    }
 }
 
 
 static void cursorPosCallback(GLFWwindow* window, double xpos, double ypos)
 {
-    //DisplayWindow* display = static_cast<DisplayWindow*>(glfwGetWindowUserPointer(window));
-    //
-    //if (mouse_button == GLFW_MOUSE_BUTTON_LEFT)
-    //{
-    //    trackball.setViewMode(sutil::Trackball::LookAtFixed);
-    //    trackball.updateTracking(static_cast<int>(xpos), static_cast<int>(ypos), display->sample.getWidth(), display->sample.getHeight());
-    //    camera_changed = true;
-    //}
-    //else if (mouse_button == GLFW_MOUSE_BUTTON_RIGHT)
-    //{
-    //    trackball.setViewMode(sutil::Trackball::EyeFixed);
-    //    trackball.updateTracking(static_cast<int>(xpos), static_cast<int>(ypos), display->sample.getWidth(), display->sample.getHeight());
-    //    camera_changed = true;
-    //}
+    DisplayWindow* display = static_cast<DisplayWindow*>(glfwGetWindowUserPointer(window));
+    display->cursorPosCB(xpos, ypos);
+}
+
+void DisplayWindow::cursorPosCB(double xpos, double ypos) {
+    if (mouse_button == GLFW_MOUSE_BUTTON_LEFT)
+    {
+        trackball.setViewMode(sutil::Trackball::LookAtFixed);
+        trackball.updateTracking(static_cast<int>(xpos), static_cast<int>(ypos), launchParams.width, launchParams.height);
+        camera_changed = true;
+    }
+    else if (mouse_button == GLFW_MOUSE_BUTTON_RIGHT)
+    {
+        trackball.setViewMode(sutil::Trackball::EyeFixed);
+        trackball.updateTracking(static_cast<int>(xpos), static_cast<int>(ypos), launchParams.width, launchParams.height);
+        camera_changed = true;
+    }
 }
 
 
@@ -63,7 +63,11 @@ static void windowSizeCallback(GLFWwindow* window, int32_t res_x, int32_t res_y)
     sutil::ensureMinimumSize(res_x, res_y);
 
     DisplayWindow* display = static_cast<DisplayWindow*>(glfwGetWindowUserPointer(window));
-    display->resize(res_x, res_y);
+    display->windowSizeCB(res_x, res_y);
+}
+
+void DisplayWindow::windowSizeCB(unsigned int res_x, unsigned int res_y) {
+    resize(res_x, res_y);
     camera_changed = true;
     resize_dirty = true;
 }
@@ -93,8 +97,31 @@ static void keyCallback(GLFWwindow* window, int32_t key, int32_t /*scancode*/, i
 
 static void scrollCallback(GLFWwindow* window, double xscroll, double yscroll)
 {
+    DisplayWindow* display = static_cast<DisplayWindow*>(glfwGetWindowUserPointer(window));
+    display->scrollCB(yscroll);
+}
+
+void DisplayWindow::scrollCB(double yscroll) {
     if (trackball.wheelEvent((int)yscroll))
         camera_changed = true;
+}
+
+void DisplayWindow::initCameraState()
+{
+    camera.setEye(make_float3(278.0f, 273.0f, -900.0f));
+    camera.setLookat(make_float3(278.0f, 273.0f, 330.0f));
+    camera.setUp(make_float3(0.0f, 1.0f, 0.0f));
+    camera.setFovY(35.0f);
+    camera_changed = true;
+
+    trackball.setCamera(&camera);
+    trackball.setMoveSpeed(10.0f);
+    trackball.setReferenceFrame(
+        make_float3(1.0f, 0.0f, 0.0f),
+        make_float3(0.0f, 0.0f, 1.0f),
+        make_float3(0.0f, 1.0f, 0.0f)
+    );
+    trackball.setGimbalLock(true);
 }
 
 DisplayWindow::~DisplayWindow() {
@@ -102,11 +129,18 @@ DisplayWindow::~DisplayWindow() {
     glfwTerminate();
 }
 
+
 DisplayWindow::DisplayWindow() {
     handle = sutil::initUI("optixPathTracer", 1200, 800);
+    launchParams.width = 1200;
+    launchParams.height = 800;
+    initWinParams();
+    initCameraState();
     glfwSetWindowUserPointer(handle, this);
     glfwMakeContextCurrent(handle);
+    sample.updateParams(launchParams);
 }
+
 
 void DisplayWindow::run() {
     int width, height;
@@ -123,8 +157,8 @@ void DisplayWindow::run() {
 
     sutil::CUDAOutputBuffer<uchar4> output_buffer(
         sutil::CUDAOutputBufferType::GL_INTEROP,
-        sample.getWidth(),
-        sample.getHeight()
+        launchParams.width,
+        launchParams.height
     );
 
     output_buffer.setStream(sample.getStream());
@@ -139,7 +173,7 @@ void DisplayWindow::run() {
         auto t0 = std::chrono::steady_clock::now();
         glfwPollEvents();
 
-        output_buffer.resize(sample.getWidth(), sample.getHeight());
+        output_buffer.resize(launchParams.width, launchParams.height);
         auto t1 = std::chrono::steady_clock::now();
         state_update_time += t1 - t0;
         t0 = t1;
