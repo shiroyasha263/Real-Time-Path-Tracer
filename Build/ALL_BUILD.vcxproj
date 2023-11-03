@@ -189,6 +189,10 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       <Project>{2055FA89-9439-3DB7-8C33-42ED823DEA2E}</Project>
       <Name>optixHello</Name>
     </ProjectReference>
+    <ProjectReference Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\Build\optixPhotonBeam\optixPhotonBeam.vcxproj">
+      <Project>{B4073CD5-E10D-3E93-ACE8-C721983C6A83}</Project>
+      <Name>optixPhotonBeam</Name>
+    </ProjectReference>
     <ProjectReference Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\Build\optixPipeline\optixPipeline.vcxproj">
       <Project>{6852C797-8E36-3764-A267-43669648B3FC}</Project>
       <Name>optixPipeline</Name>

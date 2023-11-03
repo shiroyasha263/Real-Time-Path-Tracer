@@ -1,4 +1,4 @@
-#include "SampleRenderer.h"
+#include "PhotonTracer.h"
 
 struct __align__(OPTIX_SBT_RECORD_ALIGNMENT) RaygenRecord {
 	__align__(OPTIX_SBT_RECORD_ALIGNMENT) char header[OPTIX_SBT_RECORD_HEADER_SIZE];
@@ -15,39 +15,39 @@ struct __align__(OPTIX_SBT_RECORD_ALIGNMENT) HitgroupRecord {
 	int objectID;
 };
 
-SampleRenderer::SampleRenderer() {
+PhotonTracer::PhotonTracer() {
 	InitOptix();
 
 	std::cout << "#RTPT: Creating Optix Context ... " << std::endl;
 	CreateContext();
-	
+
 	std::cout << "#RTPT: Creating Optix Module ..." << std::endl;
 	CreateModule();
-	
+
 	std::cout << "#RTPT: Creating raygen programs ..." << std::endl;
 	CreateRayGenPrograms();
-	
+
 	std::cout << "#RTPT: Creating miss programs ..." << std::endl;
 	CreateMissPrograms();
-	
+
 	std::cout << "#RTPT: Creating hitgroup programs ..." << std::endl;
 	CreateHitgroupPrograms();
-	
+
 	std::cout << "#RTPT: Creating Optix Pipeline ..." << std::endl;
 	CreatePipeline();
-	
+
 	std::cout << "#RTPT: Building SBT ..." << std::endl;
 	buildSBT();
-	
-	launchParamsBuffer.alloc(sizeof(launchParams));
+
+	photonBeamParamsBuffer.alloc(sizeof(photonBeamParams));
 	std::cout << "#RTPT: All basic things setup!" << std::endl;
-	
+
 	std::cout << TERMINAL_GREEN;
 	std::cout << "#RTPT: Optix Successfully set up ..." << std::endl;
 	std::cout << TERMINAL_DEFAULT;
 }
 
-void SampleRenderer::InitOptix() {
+void PhotonTracer::InitOptix() {
 	std::cout << "#RTPT: Initializing optix ..." << std::endl;
 
 	cudaFree(0);
@@ -71,7 +71,7 @@ static void context_log_cb(unsigned int level,
 	fprintf(stderr, "[%2d][%12s]: %s\n", (int)level, tag, message);
 }
 
-void SampleRenderer::CreateContext() {
+void PhotonTracer::CreateContext() {
 	const int deviceID = 0;
 	CUDA_CHECK(cudaSetDevice(deviceID));
 	CUDA_CHECK(cudaStreamCreate(&stream));
@@ -80,14 +80,14 @@ void SampleRenderer::CreateContext() {
 	std::cout << "#RTPT: running on device: " << deviceProps.name << std::endl;
 
 	CUresult cuRes = cuCtxGetCurrent(&cudaContext);
-	if(cuRes != CUDA_SUCCESS)
+	if (cuRes != CUDA_SUCCESS)
 		fprintf(stderr, "Error querying current context: error code %d\n", cuRes);
 
 	OPTIX_CHECK(optixDeviceContextCreate(cudaContext, 0, &optixContext));
 	OPTIX_CHECK(optixDeviceContextSetLogCallback(optixContext, context_log_cb, nullptr, 4));
 }
 
-void SampleRenderer::CreateModule() {
+void PhotonTracer::CreateModule() {
 	moduleCompileOptions.maxRegisterCount = 50;
 	moduleCompileOptions.optLevel = OPTIX_COMPILE_OPTIMIZATION_LEVEL_0;
 	moduleCompileOptions.debugLevel = OPTIX_COMPILE_DEBUG_LEVEL_FULL;
@@ -101,9 +101,9 @@ void SampleRenderer::CreateModule() {
 	pipelineCompileOptions.pipelineLaunchParamsVariableName = "optixLaunchParams";
 
 	pipelineLinkOptions.maxTraceDepth = 2;
-	
+
 	size_t      inputSize = 0;
-	const char* input = sutil::getInputData(OPTIX_SAMPLE_NAME, OPTIX_SAMPLE_DIR, "devicePrograms.cu", inputSize);
+	const char* input = sutil::getInputData(OPTIX_SAMPLE_NAME, OPTIX_SAMPLE_DIR, "PhotonTracer.cu", inputSize);
 
 	char log[2048];
 	size_t sizeof_log = sizeof(log);
@@ -119,7 +119,7 @@ void SampleRenderer::CreateModule() {
 	if (sizeof_log > 1) PRINT(log);
 }
 
-void SampleRenderer::CreateRayGenPrograms() {
+void PhotonTracer::CreateRayGenPrograms() {
 	raygenPGs.resize(1);
 
 	OptixProgramGroupOptions pgOptions = {};
@@ -141,7 +141,7 @@ void SampleRenderer::CreateRayGenPrograms() {
 	if (sizeof_log > 1) PRINT(log);
 }
 
-void SampleRenderer::CreateMissPrograms() {
+void PhotonTracer::CreateMissPrograms() {
 	missPGs.resize(1);
 
 	OptixProgramGroupOptions pgOptions = {};
@@ -163,7 +163,7 @@ void SampleRenderer::CreateMissPrograms() {
 	if (sizeof_log > 1) PRINT(log);
 }
 
-void SampleRenderer::CreateHitgroupPrograms() {
+void PhotonTracer::CreateHitgroupPrograms() {
 	hitgroupPGs.resize(1);
 
 	OptixProgramGroupOptions pgOptions = {};
@@ -186,7 +186,7 @@ void SampleRenderer::CreateHitgroupPrograms() {
 	if (sizeof_log > 1) PRINT(log);
 }
 
-void SampleRenderer::CreatePipeline() {
+void PhotonTracer::CreatePipeline() {
 	std::vector<OptixProgramGroup> programGroups;
 	for (auto pg : raygenPGs)
 		programGroups.push_back(pg);
@@ -224,7 +224,7 @@ void SampleRenderer::CreatePipeline() {
 	if (sizeof_log > 1) PRINT(log);
 }
 
-void SampleRenderer::buildSBT() {
+void PhotonTracer::buildSBT() {
 	std::vector<RaygenRecord> raygenRecords;
 	for (int i = 0; i < raygenPGs.size(); i++) {
 		RaygenRecord rec;
@@ -262,32 +262,31 @@ void SampleRenderer::buildSBT() {
 	sbt.hitgroupRecordCount = (int)hitgroupRecords.size();
 }
 
-void SampleRenderer::Render() {
-	if (launchParams.width == 0) return;
+void PhotonTracer::Render() {
+	if (photonBeamParams.maxBeams == 0) return;
 
-	launchParamsBuffer.upload(&launchParams, 1);
-	launchParams.frameID++;
+	photonBeamParamsBuffer.upload(&photonBeamParams, 1);
 
 	OPTIX_CHECK(optixLaunch(
-							pipeline, stream,
-							launchParamsBuffer.d_pointer(),
-							launchParamsBuffer.sizeInBytes,
-							&sbt,
-							launchParams.width,
-							launchParams.height,
-							1));
+		pipeline, stream,
+		photonBeamParamsBuffer.d_pointer(),
+		photonBeamParamsBuffer.sizeInBytes,
+		&sbt,
+		photonBeamParams.maxBeams,
+		1,
+		1));
 	CUDA_SYNC_CHECK();
 }
 
-void SampleRenderer::updateParams(LaunchParams params) {
-	if (params.width == 0 || params.height == 0) return;
-
-	colorBuffer.resize(params.width * params.height * sizeof(uchar4));
-	launchParams.width = params.width;
-	launchParams.height = params.height;
-	launchParams.image = (uchar4*)colorBuffer.d_pointer();
+void PhotonTracer::Resize(int beamCount, int bounceCount, float mediumProp) {
+	if (beamCount == 0 || bounceCount == 0) return;
+	photonBeamParams.materialProp = mediumProp;
+	beams.resize(beamCount * bounceCount * sizeof(PhotonBeam));
+	photonBeamParams.maxBeams = beamCount;
+	photonBeamParams.maxBounce = bounceCount;
+	photonBeamParams.beams = (PhotonBeam*)beams.d_pointer();
 }
 
-void SampleRenderer::downloadPixels(uchar4* h_pixels) {
-	colorBuffer.download(h_pixels, launchParams.width * launchParams.height);
+void PhotonTracer::GetBeams(PhotonBeam h_beams[]) {
+	beams.download(h_beams, photonBeamParams.maxBeams * photonBeamParams.maxBounce);
 }

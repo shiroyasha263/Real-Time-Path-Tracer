@@ -1,4 +1,5 @@
 #pragma once
+
 #include "CUDABuffer.h"
 #include "LaunchParams.h"
 
@@ -8,23 +9,18 @@
 
 #define PRINT(var) std::cout << #var << " = " << var << std::endl;
 
-class SampleRenderer {
+class PhotonTracer {
 public:
-	SampleRenderer();
-
+	PhotonTracer();
+	
 	void Render();
 
-	void Resize(const unsigned int width, const unsigned int height);
+	void Resize(int beamCount, int bounceCount, float mediumProp);
 
-	void downloadPixels(uchar4* h_pixels);
-
-	CUstream getStream() {
-		return stream;
-	}
-
-	void updateParams(LaunchParams launchParams);
+	void GetBeams(PhotonBeam h_beams[]);
 
 protected:
+
 	void InitOptix();
 
 	void CreateContext();
@@ -42,12 +38,13 @@ protected:
 	void buildSBT();
 
 protected:
+
 	CUcontext cudaContext;
 	CUstream stream;
 	cudaDeviceProp deviceProps;
 
 	OptixDeviceContext optixContext;
-
+	
 	OptixPipeline pipeline;
 	OptixPipelineCompileOptions pipelineCompileOptions = {};
 	OptixPipelineLinkOptions pipelineLinkOptions = {};
@@ -63,9 +60,8 @@ protected:
 	CUDABuffer hitgroupRecordsBuffer;
 	OptixShaderBindingTable sbt = {};
 
-	CUDABuffer launchParamsBuffer;
-	LaunchParams launchParams;
+	PhotonBeamParams photonBeamParams;
+	CUDABuffer photonBeamParamsBuffer;
 
-	CUDABuffer colorBuffer;
-	CUDABuffer accumBuffer;
+	CUDABuffer beams;
 };

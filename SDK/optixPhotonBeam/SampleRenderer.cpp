@@ -12,10 +12,11 @@ struct __align__(OPTIX_SBT_RECORD_ALIGNMENT) MissRecord {
 
 struct __align__(OPTIX_SBT_RECORD_ALIGNMENT) HitgroupRecord {
 	__align__(OPTIX_SBT_RECORD_ALIGNMENT) char header[OPTIX_SBT_RECORD_HEADER_SIZE];
-	int objectID;
+	QuadSBTData data;
 };
 
-SampleRenderer::SampleRenderer() {
+SampleRenderer::SampleRenderer(const std::vector<Quad> &quads)
+	:quads(quads) {
 	InitOptix();
 
 	std::cout << "#RTPT: Creating Optix Context ... " << std::endl;
@@ -33,6 +34,8 @@ SampleRenderer::SampleRenderer() {
 	std::cout << "#RTPT: Creating hitgroup programs ..." << std::endl;
 	CreateHitgroupPrograms();
 	
+	launchParams.handle = buildAccel();
+
 	std::cout << "#RTPT: Creating Optix Pipeline ..." << std::endl;
 	CreatePipeline();
 	
@@ -45,6 +48,138 @@ SampleRenderer::SampleRenderer() {
 	std::cout << TERMINAL_GREEN;
 	std::cout << "#RTPT: Optix Successfully set up ..." << std::endl;
 	std::cout << TERMINAL_DEFAULT;
+}
+
+OptixTraversableHandle SampleRenderer::buildAccel() {
+	vertexBuffer.resize(quads.size());
+	indexBuffer.resize(quads.size());
+
+	OptixTraversableHandle asHandle{ 0 };
+
+	// ==================================================================
+	// triangle inputs
+	// ==================================================================
+	std::vector<OptixBuildInput> triangleInput(quads.size());
+	std::vector<CUdeviceptr> d_vertices(quads.size());
+	std::vector<CUdeviceptr> d_indices(quads.size());
+	std::vector<uint32_t> triangleInputFlags(quads.size());
+
+	for (int meshID = 0; meshID < quads.size(); meshID++) {
+		// upload the model to the device: the builder
+		Quad& model = quads[meshID];
+		vertexBuffer[meshID].alloc_and_upload(model.vertex);
+		indexBuffer[meshID].alloc_and_upload(model.index);
+
+		triangleInput[meshID] = {};
+		triangleInput[meshID].type
+			= OPTIX_BUILD_INPUT_TYPE_TRIANGLES;
+
+		// create local variables, because we need a *pointer* to the
+		// device pointers
+		d_vertices[meshID] = vertexBuffer[meshID].d_pointer();
+		d_indices[meshID] = indexBuffer[meshID].d_pointer();
+
+		triangleInput[meshID].triangleArray.vertexFormat = OPTIX_VERTEX_FORMAT_FLOAT3;
+		triangleInput[meshID].triangleArray.vertexStrideInBytes = sizeof(float3);
+		triangleInput[meshID].triangleArray.numVertices = (int)model.vertex.size();
+		triangleInput[meshID].triangleArray.vertexBuffers = &d_vertices[meshID];
+
+		triangleInput[meshID].triangleArray.indexFormat = OPTIX_INDICES_FORMAT_UNSIGNED_INT3;
+		triangleInput[meshID].triangleArray.indexStrideInBytes = sizeof(int3);
+		triangleInput[meshID].triangleArray.numIndexTriplets = (int)model.index.size();
+		triangleInput[meshID].triangleArray.indexBuffer = d_indices[meshID];
+
+		triangleInputFlags[meshID] = 0;
+
+		// in this example we have one SBT entry, and no per-primitive
+		// materials:
+		triangleInput[meshID].triangleArray.flags = &triangleInputFlags[meshID];
+		triangleInput[meshID].triangleArray.numSbtRecords = 1;
+		triangleInput[meshID].triangleArray.sbtIndexOffsetBuffer = 0;
+		triangleInput[meshID].triangleArray.sbtIndexOffsetSizeInBytes = 0;
+		triangleInput[meshID].triangleArray.sbtIndexOffsetStrideInBytes = 0;
+	}
+	// ==================================================================
+	// BLAS setup
+	// ==================================================================
+
+	OptixAccelBuildOptions accelOptions = {};
+	accelOptions.buildFlags = OPTIX_BUILD_FLAG_NONE
+		| OPTIX_BUILD_FLAG_ALLOW_COMPACTION
+		;
+	accelOptions.motionOptions.numKeys = 1;
+	accelOptions.operation = OPTIX_BUILD_OPERATION_BUILD;
+
+	OptixAccelBufferSizes blasBufferSizes;
+	OPTIX_CHECK(optixAccelComputeMemoryUsage
+	(optixContext,
+		&accelOptions,
+		triangleInput.data(),
+		(int)quads.size(),  // num_build_inputs
+		&blasBufferSizes
+	));
+
+	// ==================================================================
+	// prepare compaction
+	// ==================================================================
+
+	CUDABuffer compactedSizeBuffer;
+	compactedSizeBuffer.alloc(sizeof(uint64_t));
+
+	OptixAccelEmitDesc emitDesc;
+	emitDesc.type = OPTIX_PROPERTY_TYPE_COMPACTED_SIZE;
+	emitDesc.result = compactedSizeBuffer.d_pointer();
+
+	// ==================================================================
+	// execute build (main stage)
+	// ==================================================================
+
+	CUDABuffer tempBuffer;
+	tempBuffer.alloc(blasBufferSizes.tempSizeInBytes);
+
+	CUDABuffer outputBuffer;
+	outputBuffer.alloc(blasBufferSizes.outputSizeInBytes);
+
+	OPTIX_CHECK(optixAccelBuild(optixContext,
+		/* stream */0,
+		&accelOptions,
+		triangleInput.data(),
+		(int)quads.size(),
+		tempBuffer.d_pointer(),
+		tempBuffer.sizeInBytes,
+
+		outputBuffer.d_pointer(),
+		outputBuffer.sizeInBytes,
+
+		&asHandle,
+
+		&emitDesc, 1
+	));
+	CUDA_SYNC_CHECK();
+
+	// ==================================================================
+	// perform compaction
+	// ==================================================================
+	uint64_t compactedSize;
+	compactedSizeBuffer.download(&compactedSize, 1);
+
+	asBuffer.alloc(compactedSize);
+	OPTIX_CHECK(optixAccelCompact(optixContext,
+		/*stream:*/0,
+		asHandle,
+		asBuffer.d_pointer(),
+		asBuffer.sizeInBytes,
+		&asHandle));
+	CUDA_SYNC_CHECK();
+
+	// ==================================================================
+	// aaaaaand .... clean up
+	// ==================================================================
+	outputBuffer.free(); // << the UNcompacted, temporary output buffer
+	tempBuffer.free();
+	compactedSizeBuffer.free();
+
+	return asHandle;
 }
 
 void SampleRenderer::InitOptix() {
@@ -93,7 +228,7 @@ void SampleRenderer::CreateModule() {
 	moduleCompileOptions.debugLevel = OPTIX_COMPILE_DEBUG_LEVEL_FULL;
 
 	pipelineCompileOptions = {};
-	pipelineCompileOptions.traversableGraphFlags = OPTIX_TRAVERSABLE_GRAPH_FLAG_ALLOW_SINGLE_GAS;
+	pipelineCompileOptions.traversableGraphFlags = OPTIX_TRAVERSABLE_GRAPH_FLAG_ALLOW_ANY;
 	pipelineCompileOptions.usesMotionBlur = false;
 	pipelineCompileOptions.numPayloadValues = 2;
 	pipelineCompileOptions.numAttributeValues = 2;
@@ -247,13 +382,15 @@ void SampleRenderer::buildSBT() {
 	sbt.missRecordStrideInBytes = sizeof(MissRecord);
 	sbt.missRecordCount = (int)missRecords.size();
 
-	int numObjects = 1;
+	int numObjects = (int)quads.size();
 	std::vector<HitgroupRecord> hitgroupRecords;
-	for (int i = 0; i < numObjects; i++) {
-		int objectType = 0;
+	for (int meshID = 0; meshID < numObjects; meshID++) {
 		HitgroupRecord rec;
-		OPTIX_CHECK(optixSbtRecordPackHeader(hitgroupPGs[objectType], &rec));
-		rec.objectID = i;
+		OPTIX_CHECK(optixSbtRecordPackHeader(hitgroupPGs[0], &rec));
+		rec.data.transmittance = quads[meshID].transmittance;
+		rec.data.vertex = (float3*)vertexBuffer[meshID].d_pointer();
+		rec.data.index = (int3*)indexBuffer[meshID].d_pointer();
+		rec.data.start = quads[meshID].start;
 		hitgroupRecords.push_back(rec);
 	}
 	hitgroupRecordsBuffer.alloc_and_upload(hitgroupRecords);
@@ -263,7 +400,7 @@ void SampleRenderer::buildSBT() {
 }
 
 void SampleRenderer::Render() {
-	if (launchParams.width == 0) return;
+	if (launchParams.width == 0 || launchParams.height == 0) return;
 
 	launchParamsBuffer.upload(&launchParams, 1);
 	launchParams.frameID++;
@@ -281,7 +418,7 @@ void SampleRenderer::Render() {
 
 void SampleRenderer::updateParams(LaunchParams params) {
 	if (params.width == 0 || params.height == 0) return;
-
+	launchParams.mediumProp = params.mediumProp;
 	colorBuffer.resize(params.width * params.height * sizeof(uchar4));
 	launchParams.width = params.width;
 	launchParams.height = params.height;

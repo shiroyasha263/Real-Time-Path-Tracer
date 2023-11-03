@@ -8,9 +8,16 @@
 
 #define PRINT(var) std::cout << #var << " = " << var << std::endl;
 
+struct Quad {
+	std::vector<float3> vertex;
+	std::vector<int3> index;
+	float transmittance;
+	float3 start;
+};
+
 class SampleRenderer {
 public:
-	SampleRenderer();
+	SampleRenderer(const std::vector<Quad> &quads);
 
 	void Render();
 
@@ -41,6 +48,8 @@ protected:
 
 	void buildSBT();
 
+	OptixTraversableHandle buildAccel();
+
 protected:
 	CUcontext cudaContext;
 	CUstream stream;
@@ -67,5 +76,9 @@ protected:
 	LaunchParams launchParams;
 
 	CUDABuffer colorBuffer;
-	CUDABuffer accumBuffer;
+
+	std::vector<Quad> quads;
+	std::vector<CUDABuffer> vertexBuffer;
+	std::vector<CUDABuffer> indexBuffer;
+	CUDABuffer asBuffer;
 };

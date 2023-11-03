@@ -36,6 +36,7 @@ if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
   include("C:/Users/Vishu/Downloads/Real Time Path Tracer/Build/optixHello/cmake_install.cmake")
   include("C:/Users/Vishu/Downloads/Real Time Path Tracer/Build/optixPipeline/cmake_install.cmake")
+  include("C:/Users/Vishu/Downloads/Real Time Path Tracer/Build/optixPhotonBeam/cmake_install.cmake")
   include("C:/Users/Vishu/Downloads/Real Time Path Tracer/Build/sutil/cmake_install.cmake")
   include("C:/Users/Vishu/Downloads/Real Time Path Tracer/Build/support/cmake_install.cmake")
 

@@ -538,6 +538,7 @@ endfunction()
 # and the CMakeLists.txt file.
 add_subdirectory( optixHello              )
 add_subdirectory( optixPipeline              )
+add_subdirectory( optixPhotonBeam		)
 
 # Our sutil library.  The rules to build it are found in the subdirectory.
 add_subdirectory(sutil)

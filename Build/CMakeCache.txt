@@ -525,7 +525,7 @@ CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_MT
 CMAKE_MT-ADVANCED:INTERNAL=1
 //number of local generators
-CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=8
+CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=9
 //Platform information initialized
 CMAKE_PLATFORM_INFO_INITIALIZED:INTERNAL=1
 //noop for ranlib
@@ -577,7 +577,7 @@ COMPILER_LIBRARY_PATH-ADVANCED:INTERNAL=1
 CUDA_64_BIT_DEVICE_CODE-ADVANCED:INTERNAL=0
 //List of intermediate files that are part of the cuda dependency
 // scanning.
-CUDA_ADDITIONAL_CLEAN_FILES:INTERNAL=C:/Users/Vishu/Downloads/Real Time Path Tracer/Build/optixHello/CMakeFiles/optixHello.dir//optixHello_generated_draw_solid_color.cu.optixir.depend;C:/Users/Vishu/Downloads/Real Time Path Tracer/Build/optixPipeline/CMakeFiles/optixPipeline.dir//optixPipeline_generated_devicePrograms.cu.optixir.depend;C:/Users/Vishu/Downloads/Real Time Path Tracer/Build/sutil/CMakeFiles/sutil.dir/__/cuda/sutil_generated_camera.cu.optixir.depend;C:/Users/Vishu/Downloads/Real Time Path Tracer/Build/sutil/CMakeFiles/sutil.dir/__/cuda/sutil_generated_geometry.cu.optixir.depend;C:/Users/Vishu/Downloads/Real Time Path Tracer/Build/sutil/CMakeFiles/sutil.dir/__/cuda/sutil_generated_shading.cu.optixir.depend;C:/Users/Vishu/Downloads/Real Time Path Tracer/Build/sutil/CMakeFiles/sutil.dir/__/cuda/sutil_generated_sphere.cu.optixir.depend;C:/Users/Vishu/Downloads/Real Time Path Tracer/Build/sutil/CMakeFiles/sutil.dir/__/cuda/sutil_generated_whitted.cu.optixir.depend
+CUDA_ADDITIONAL_CLEAN_FILES:INTERNAL=C:/Users/Vishu/Downloads/Real Time Path Tracer/Build/optixHello/CMakeFiles/optixHello.dir//optixHello_generated_draw_solid_color.cu.optixir.depend;C:/Users/Vishu/Downloads/Real Time Path Tracer/Build/optixPipeline/CMakeFiles/optixPipeline.dir//optixPipeline_generated_devicePrograms.cu.optixir.depend;C:/Users/Vishu/Downloads/Real Time Path Tracer/Build/sutil/CMakeFiles/sutil.dir/__/cuda/sutil_generated_camera.cu.optixir.depend;C:/Users/Vishu/Downloads/Real Time Path Tracer/Build/sutil/CMakeFiles/sutil.dir/__/cuda/sutil_generated_geometry.cu.optixir.depend;C:/Users/Vishu/Downloads/Real Time Path Tracer/Build/sutil/CMakeFiles/sutil.dir/__/cuda/sutil_generated_shading.cu.optixir.depend;C:/Users/Vishu/Downloads/Real Time Path Tracer/Build/sutil/CMakeFiles/sutil.dir/__/cuda/sutil_generated_sphere.cu.optixir.depend;C:/Users/Vishu/Downloads/Real Time Path Tracer/Build/sutil/CMakeFiles/sutil.dir/__/cuda/sutil_generated_whitted.cu.optixir.depend;C:/Users/Vishu/Downloads/Real Time Path Tracer/Build/optixPhotonBeam/CMakeFiles/optixPhotonBeam.dir//optixPhotonBeam_generated_devicePrograms.cu.optixir.depend;C:/Users/Vishu/Downloads/Real Time Path Tracer/Build/optixPhotonBeam/CMakeFiles/optixPhotonBeam.dir//optixPhotonBeam_generated_PhotonTracer.cu.optixir.depend
 //ADVANCED property for variable: CUDA_ATTACH_VS_BUILD_RULE_TO_CUDA_FILE
 CUDA_ATTACH_VS_BUILD_RULE_TO_CUDA_FILE-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CUDA_BUILD_CUBIN
