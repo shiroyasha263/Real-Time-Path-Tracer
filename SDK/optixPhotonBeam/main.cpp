@@ -16,9 +16,9 @@ int main(int argc, char** argv) {
     try {
         PhotonTracer sample;
 
-        int maxBeams = 20000;
-        int maxBounce = 3;
-        float mediumProp = .8f;
+        int maxBeams = 1000;
+        int maxBounce = 1;
+        float mediumProp = 0.3f;
         sample.Resize(maxBeams, maxBounce, mediumProp);
         sample.Render();
 
@@ -26,19 +26,36 @@ int main(int argc, char** argv) {
         sample.GetBeams(pBeams.data());
 
         float thickness = 0.15f;
-        float3 eye = make_float3(0, 0, -5);
-        std::vector<Quad> quads(pBeams.size());
+        size_t breakSize = 1;
+        float3 eye = make_float3(0, 0, -4);
+        std::vector<Quad> quads(pBeams.size() * breakSize);
+
+        //for (int i = 0; i < pBeams.size(); i++) {
+        //    float3 dir = normalize(cross(pBeams[i].start - eye, pBeams[i].end - pBeams[i].start));
+        //    quads[i].vertex.push_back(pBeams[i].start + thickness * dir / 2.0f);
+        //    quads[i].vertex.push_back(pBeams[i].start - thickness * dir / 2.0f);
+        //    quads[i].vertex.push_back(pBeams[i].end   + thickness * dir / 2.0f);
+        //    quads[i].vertex.push_back(pBeams[i].end   - thickness * dir / 2.0f);
+        //    quads[i].index.push_back(make_int3(0, 1, 2));
+        //    quads[i].index.push_back(make_int3(3, 2, 1));
+        //    quads[i].transmittance = pBeams[i].transmittance;
+        //    quads[i].start = pBeams[i].start;
+        //}
 
         for (int i = 0; i < pBeams.size(); i++) {
-            float3 dir = normalize(cross(pBeams[i].start - eye, pBeams[i].end - pBeams[i].start));
-            quads[i].vertex.push_back(pBeams[i].start + thickness * dir / 2.0f);
-            quads[i].vertex.push_back(pBeams[i].start - thickness * dir / 2.0f);
-            quads[i].vertex.push_back(pBeams[i].end   + thickness * dir / 2.0f);
-            quads[i].vertex.push_back(pBeams[i].end   - thickness * dir / 2.0f);
-            quads[i].index.push_back(make_int3(0, 1, 2));
-            quads[i].index.push_back(make_int3(3, 2, 1));
-            quads[i].transmittance = pBeams[i].transmittance;
-            quads[i].start = pBeams[i].start;
+            float3 widthDir = normalize(cross(pBeams[i].start - eye, pBeams[i].end - pBeams[i].start));
+            float3 lengthDir = pBeams[i].end - pBeams[i].start;
+            
+            for (int j = 0; j < breakSize; j++) {
+                quads[i * breakSize + j].vertex.push_back(pBeams[i].start + j * lengthDir / breakSize + thickness * widthDir / 2.0f);
+                quads[i * breakSize + j].vertex.push_back(pBeams[i].start + j * lengthDir / breakSize - thickness * widthDir / 2.0f);
+                quads[i * breakSize + j].vertex.push_back(pBeams[i].start + (j + 1) * lengthDir / breakSize + thickness * widthDir / 2.0f);
+                quads[i * breakSize + j].vertex.push_back(pBeams[i].start + (j + 1) * lengthDir / breakSize - thickness * widthDir / 2.0f);
+                quads[i * breakSize + j].index.push_back(make_int3(0, 1, 2));
+                quads[i * breakSize + j].index.push_back(make_int3(3, 2, 1));
+                quads[i * breakSize + j].transmittance = pBeams[i].transmittance;
+                quads[i * breakSize + j].start = pBeams[i].start;
+            }
         }
 
         DisplayWindow* window = new DisplayWindow(quads, mediumProp);

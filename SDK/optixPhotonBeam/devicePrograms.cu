@@ -65,10 +65,9 @@ extern "C" __global__ void __anyhit__radiance()
     float3 rayDir = optixGetWorldRayDirection();
     float3 origin = optixGetWorldRayOrigin();
     float3 hitPoint = origin + rayDir * tmax;
-    float disTransmittance = exp(-length(hitPoint - sbtData.start) * optixLaunchParams.mediumProp);
     float eyeTransmittance = exp(-tmax * optixLaunchParams.mediumProp);
     float3& prd = *(float3*)getPRD<float3>();
-    prd += disTransmittance * transmittance * eyeTransmittance * make_float3(1.f, 1.f, 1.f) / 200.f;
+    prd += transmittance * eyeTransmittance * make_float3(1.f, 1.f, 1.f) * 2.f / 100.f;
     prd = clamp(prd, make_float3(0.f, 0.f, 0.f), make_float3(1.f, 1.f, 1.f));
 
     optixIgnoreIntersection();
@@ -102,7 +101,7 @@ extern "C" __global__ void __raygen__renderFrame()
     const int ix = optixGetLaunchIndex().x;
     const int iy = optixGetLaunchIndex().y;
 
-    const float3 position = make_float3(0, 0, -3);
+    const float3 position = make_float3(0, 0, -4);
 
     // our per-ray data for this example. what we initialize it to
     // won't matter, since this value will be overwritten by either
