@@ -487,11 +487,25 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
+    <None Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\SDK\optixPhotonBeam\default.frag">
+    </None>
+    <None Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\SDK\optixPhotonBeam\default.vert">
+    </None>
+    <ClInclude Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\SDK\optixPhotonBeam\EBO.h" />
+    <ClInclude Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\SDK\optixPhotonBeam\VBO.h" />
+    <ClInclude Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\SDK\optixPhotonBeam\VAO.h" />
+    <ClInclude Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\SDK\optixPhotonBeam\Camera.h" />
+    <ClInclude Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\SDK\optixPhotonBeam\shaderClass.h" />
     <ClInclude Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\SDK\optixPhotonBeam\CUDABuffer.h" />
     <ClInclude Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\SDK\optixPhotonBeam\LaunchParams.h" />
     <ClInclude Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\SDK\optixPhotonBeam\SampleRenderer.h" />
     <ClInclude Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\SDK\optixPhotonBeam\PhotonTracer.h" />
     <ClInclude Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\SDK\optixPhotonBeam\DisplayWindow.h" />
+    <ClCompile Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\SDK\optixPhotonBeam\EBO.cpp" />
+    <ClCompile Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\SDK\optixPhotonBeam\VBO.cpp" />
+    <ClCompile Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\SDK\optixPhotonBeam\VAO.cpp" />
+    <ClCompile Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\SDK\optixPhotonBeam\Camera.cpp" />
+    <ClCompile Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\SDK\optixPhotonBeam\shaderClass.cpp" />
     <ClCompile Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\SDK\optixPhotonBeam\SampleRenderer.cpp" />
     <ClCompile Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\SDK\optixPhotonBeam\PhotonTracer.cpp" />
     <ClCompile Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\SDK\optixPhotonBeam\DisplayWindow.cpp" />

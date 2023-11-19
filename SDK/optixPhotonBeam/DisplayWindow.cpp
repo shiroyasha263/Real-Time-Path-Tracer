@@ -1,6 +1,15 @@
 #include "DisplayWindow.h"
 #include <vector_types.h>
 #include <sutil/vec_math.h>
+#include <glm/glm/glm.hpp>
+#include<glm/glm/gtc/matrix_transform.hpp>
+#include<glm/glm/gtc/type_ptr.hpp>
+
+#include"shaderClass.h"
+#include"VAO.h"
+#include"VBO.h"
+#include"EBO.h"
+#include"Camera.h"
 
 bool minimized = false;
 
@@ -52,7 +61,6 @@ void DisplayWindow::cursorPosCB(double xpos, double ypos) {
     }
 }
 
-
 static void windowSizeCallback(GLFWwindow* window, int32_t res_x, int32_t res_y)
 {
     // Keep rendering at the current resolution when the window is minimized.
@@ -72,12 +80,10 @@ void DisplayWindow::windowSizeCB(unsigned int res_x, unsigned int res_y) {
     resize_dirty = true;
 }
 
-
 static void windowIconifyCallback(GLFWwindow* window, int32_t iconified)
 {
     minimized = (iconified > 0);
 }
-
 
 static void keyCallback(GLFWwindow* window, int32_t key, int32_t /*scancode*/, int32_t action, int32_t /*mods*/)
 {
@@ -93,7 +99,6 @@ static void keyCallback(GLFWwindow* window, int32_t key, int32_t /*scancode*/, i
         // toggle UI draw
     }
 }
-
 
 static void scrollCallback(GLFWwindow* window, double xscroll, double yscroll)
 {
@@ -129,7 +134,6 @@ DisplayWindow::~DisplayWindow() {
     glfwTerminate();
 }
 
-
 DisplayWindow::DisplayWindow(const std::vector<Quad> &quads, float mediumProp)
 :sample(SampleRenderer(quads)) {
     handle = sutil::initUI("optixPathTracer", 1200, 800);
@@ -141,30 +145,78 @@ DisplayWindow::DisplayWindow(const std::vector<Quad> &quads, float mediumProp)
     glfwSetWindowUserPointer(handle, this);
     glfwMakeContextCurrent(handle);
     sample.updateParams(launchParams);
-}
 
+    int perVertexFloat = 4;
+    int perQuadFloat = (3 + 1) * perVertexFloat;
+    int perQuadIndices = 6;
+    const int vertexCount = quads.size() * perQuadFloat;
+    vertices = std::vector<GLfloat>(vertexCount);
+    indices = std::vector<GLuint>(quads.size() * 6);
+
+    for (int i = 0; i < quads.size(); i++) {
+        for (int j = 0; j < 4; j++) {
+            vertices[i * perQuadFloat + j * perVertexFloat + 0] = (quads[i].vertex[j].x);
+            vertices[i * perQuadFloat + j * perVertexFloat + 1] = (quads[i].vertex[j].y);
+            vertices[i * perQuadFloat + j * perVertexFloat + 2] = (quads[i].vertex[j].z);
+            vertices[i * perQuadFloat + j * perVertexFloat + 3] = (quads[i].transmittance);
+        }
+        indices[i * perQuadIndices + 0] = (i * 4 + 0);
+        indices[i * perQuadIndices + 1] = (i * 4 + 1);
+        indices[i * perQuadIndices + 2] = (i * 4 + 2);
+        indices[i * perQuadIndices + 3] = (i * 4 + 3);
+        indices[i * perQuadIndices + 4] = (i * 4 + 2);
+        indices[i * perQuadIndices + 5] = (i * 4 + 1);
+    }
+}
 
 void DisplayWindow::run() {
     int width, height;
     glfwGetFramebufferSize(handle, &width, &height);
-    resize(width, height);
+    //resize(width, height);
+    //glfwSetMouseButtonCallback(handle, mouseButtonCallback);
+    //glfwSetCursorPosCallback(handle, cursorPosCallback);
+    //glfwSetWindowSizeCallback(handle, windowSizeCallback);
+    //glfwSetWindowIconifyCallback(handle, windowIconifyCallback);
+    //glfwSetKeyCallback(handle, keyCallback);
+    //glfwSetScrollCallback(handle, scrollCallback);
+
+    //gladLoadGL();
+    glViewport(0, 0, launchParams.width, launchParams.height);
 
 
-    glfwSetMouseButtonCallback(handle, mouseButtonCallback);
-    glfwSetCursorPosCallback(handle, cursorPosCallback);
-    glfwSetWindowSizeCallback(handle, windowSizeCallback);
-    glfwSetWindowIconifyCallback(handle, windowIconifyCallback);
-    glfwSetKeyCallback(handle, keyCallback);
-    glfwSetScrollCallback(handle, scrollCallback);
+    Shader shaderProgram("default.vert", "default.frag");
+    VAO VAO1;
+    VAO1.Bind();
 
-    sutil::CUDAOutputBuffer<uchar4> output_buffer(
-        sutil::CUDAOutputBufferType::GL_INTEROP,
-        launchParams.width,
-        launchParams.height
-    );
+    VBO VBO1(vertices.data(), vertices.size() * sizeof(GLfloat));
+    EBO EBO1(indices.data(), indices.size() * sizeof(GLuint));
 
-    output_buffer.setStream(sample.getStream());
-    sutil::GLDisplay gl_display;
+    VAO1.LinkAttrib(VBO1, 0, 3, GL_FLOAT, 4 * sizeof(float), (void*)0);
+    VAO1.LinkAttrib(VBO1, 1, 1, GL_FLOAT, 4 * sizeof(float), (void*)(3 * sizeof(float)));
+
+    VAO1.Unbind();
+    VBO1.Unbind();
+    EBO1.Unbind();
+
+    glm::vec3 beamsPos = glm::vec3(0.f, 0.f, 0.f);
+    glm::mat4 beamModel = glm::mat4(1.0f);
+    beamModel = glm::translate(beamModel, beamsPos);
+
+    shaderProgram.Activate();
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram.ID, "model"), 1, GL_FALSE, glm::value_ptr(beamModel));
+    glUniform4f(glGetUniformLocation(shaderProgram.ID, "lightColor"), 1.f, 1.f, 1.f, 1.f);
+
+    glEnable(GL_DEPTH_TEST);
+    Camera camera(width, height, glm::vec3(0.f, 0.f, 4.f));
+
+    //sutil::CUDAOutputBuffer<uchar4> output_buffer(
+    //    sutil::CUDAOutputBufferType::GL_INTEROP,
+    //    launchParams.width,
+    //    launchParams.height
+    //);
+
+    //output_buffer.setStream(sample.getStream());
+    //sutil::GLDisplay gl_display;
 
     std::chrono::duration<double> state_update_time(0.0);
     std::chrono::duration<double> render_time(0.0);
@@ -175,17 +227,33 @@ void DisplayWindow::run() {
         auto t0 = std::chrono::steady_clock::now();
         glfwPollEvents();
 
-        output_buffer.resize(launchParams.width, launchParams.height);
+        //output_buffer.resize(launchParams.width, launchParams.height);
         auto t1 = std::chrono::steady_clock::now();
         state_update_time += t1 - t0;
         t0 = t1;
 
-        render();
+        //render();
+
+        glClearColor(0.f, 0.f, 0.f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        camera.Inputs(handle);
+        camera.updateMatrix(45.0f, 0.1f, 100.0f);
+
+        shaderProgram.Activate();
+        glUniform3f(glGetUniformLocation(shaderProgram.ID, "camPos"), camera.Position.x, camera.Position.y, camera.Position.z);
+        // Export the camMatrix to the Vertex Shader of the pyramid
+        camera.Matrix(shaderProgram, "camMatrix");
+        // Bind the VAO so OpenGL knows to use it
+        VAO1.Bind();
+        // Draw primitives, number of indices, datatype of indices, index of indices
+        glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+
+
         t1 = std::chrono::steady_clock::now();
         render_time += t1 - t0;
         t0 = t1;
 
-        draw(output_buffer, gl_display);
+        //draw(output_buffer, gl_display);
         t1 = std::chrono::steady_clock::now();
         display_time += t1 - t0;
 
@@ -198,7 +266,8 @@ void DisplayWindow::run() {
 }
 
 void DisplayWindow::render() {
-    sample.Render();
+    glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 void DisplayWindow::draw(sutil::CUDAOutputBuffer<uchar4>& output_buffer, sutil::GLDisplay& gl_display) {

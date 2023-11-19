@@ -181,6 +181,10 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       <Project>{6E5D0F1A-DDC5-328A-8187-AEDC9A70C257}</Project>
       <Name>glfw</Name>
     </ProjectReference>
+    <ProjectReference Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\Build\support\glm\glm\glm_shared.vcxproj">
+      <Project>{B2CEC506-B622-39DE-8488-C929AB875014}</Project>
+      <Name>glm_shared</Name>
+    </ProjectReference>
     <ProjectReference Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\Build\support\imgui\imgui.vcxproj">
       <Project>{7590994D-0C09-33C5-A964-4F6219AD75F8}</Project>
       <Name>imgui</Name>

@@ -67,7 +67,7 @@ extern "C" __global__ void __anyhit__radiance()
     float3 hitPoint = origin + rayDir * tmax;
     float eyeTransmittance = exp(-tmax * optixLaunchParams.mediumProp);
     float3& prd = *(float3*)getPRD<float3>();
-    prd += transmittance * eyeTransmittance * make_float3(1.f, 1.f, 1.f) * 2.f / 100.f;
+    prd += make_float3(1.f, 1.f, 1.f);
     prd = clamp(prd, make_float3(0.f, 0.f, 0.f), make_float3(1.f, 1.f, 1.f));
 
     optixIgnoreIntersection();

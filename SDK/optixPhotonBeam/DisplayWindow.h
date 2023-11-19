@@ -73,6 +73,9 @@ struct DisplayWindow {
     LaunchParams launchParams;
     SampleRenderer sample;
 
+    std::vector<GLuint> indices;
+    std::vector<GLfloat> vertices;
+
     bool resize_dirty;
 
     // Camera state
