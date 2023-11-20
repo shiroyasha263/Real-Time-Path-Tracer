@@ -16,6 +16,8 @@ out float transmittance;
 // Outputs the current position for the Fragment Shader
 out vec3 crntPos;
 
+out float depth;
+
 // Imports the camera matrix from the main function
 uniform mat4 camMatrix;
 // Imports the model matrix from the main function
@@ -28,6 +30,9 @@ void main()
 {
 	// calculates current position
 	vec3 aPos = beamSide + dirMult * thickness * normalize(cross(beamSide - camPos, beamDir)) / 2.f;
+
+	depth = length(aPos - camPos);
+
 	crntPos = vec3(model * vec4(aPos, 1.0f));
 	// Outputs the positions/coordinates of all vertices
 	gl_Position = camMatrix * vec4(crntPos, 1.0);

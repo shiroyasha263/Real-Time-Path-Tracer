@@ -18,7 +18,7 @@ int main(int argc, char** argv) {
 
         int maxBeams = 10000;
         int maxBounce = 1;
-        float mediumProp = 0.4f;
+        float mediumProp = 2.f;
         sample.Resize(maxBeams, maxBounce, mediumProp);
         sample.Render();
 

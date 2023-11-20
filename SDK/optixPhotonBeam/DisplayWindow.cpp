@@ -182,7 +182,7 @@ DisplayWindow::DisplayWindow(const std::vector<PhotonBeam> &pBeams, float medium
             vertices[i * perQuadFloat + j * perVertexFloat + 6] = beamDir.z;
 
             //Thickness of the beam
-            float thickness = 0.15f;
+            float thickness = 0.01f;
             vertices[i * perQuadFloat + j * perVertexFloat + 7] = thickness;
 
             //Transmittance of the beam
@@ -237,7 +237,12 @@ void DisplayWindow::run() {
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram.ID, "model"), 1, GL_FALSE, glm::value_ptr(beamModel));
     //glUniform4f(glGetUniformLocation(shaderProgram.ID, "lightColor"), 1.f, 1.f, 1.f, 1.f);
 
-    glEnable(GL_DEPTH_TEST);
+    //glEnable(GL_DEPTH_TEST);
+    glDisable(GL_CULL_FACE);
+    glDisable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
+    //glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     Camera camera(width, height, glm::vec3(0.f, 0.f, 4.f));
 
     //sutil::CUDAOutputBuffer<uchar4> output_buffer(
