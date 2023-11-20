@@ -16,7 +16,7 @@ int main(int argc, char** argv) {
     try {
         PhotonTracer sample;
 
-        int maxBeams = 100;
+        int maxBeams = 100000;
         int maxBounce = 1;
         float mediumProp = 1.2f;
         sample.Resize(maxBeams, maxBounce, mediumProp);

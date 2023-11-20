@@ -180,7 +180,7 @@ void DisplayWindow::run() {
     //glfwSetKeyCallback(handle, keyCallback);
     //glfwSetScrollCallback(handle, scrollCallback);
 
-    //gladLoadGL();
+    gladLoadGL();
     glViewport(0, 0, launchParams.width, launchParams.height);
 
 
@@ -204,7 +204,7 @@ void DisplayWindow::run() {
 
     shaderProgram.Activate();
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram.ID, "model"), 1, GL_FALSE, glm::value_ptr(beamModel));
-    glUniform4f(glGetUniformLocation(shaderProgram.ID, "lightColor"), 1.f, 1.f, 1.f, 1.f);
+    //glUniform4f(glGetUniformLocation(shaderProgram.ID, "lightColor"), 1.f, 1.f, 1.f, 1.f);
 
     glEnable(GL_DEPTH_TEST);
     Camera camera(width, height, glm::vec3(0.f, 0.f, 4.f));
@@ -240,7 +240,7 @@ void DisplayWindow::run() {
         camera.updateMatrix(45.0f, 0.1f, 100.0f);
 
         shaderProgram.Activate();
-        glUniform3f(glGetUniformLocation(shaderProgram.ID, "camPos"), camera.Position.x, camera.Position.y, camera.Position.z);
+        //glUniform3f(glGetUniformLocation(shaderProgram.ID, "camPos"), camera.Position.x, camera.Position.y, camera.Position.z);
         // Export the camMatrix to the Vertex Shader of the pyramid
         camera.Matrix(shaderProgram, "camMatrix");
         // Bind the VAO so OpenGL knows to use it
