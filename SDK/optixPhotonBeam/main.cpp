@@ -16,9 +16,9 @@ int main(int argc, char** argv) {
     try {
         PhotonTracer sample;
 
-        int maxBeams = 100000;
+        int maxBeams = 10000;
         int maxBounce = 1;
-        float mediumProp = 1.2f;
+        float mediumProp = 0.4f;
         sample.Resize(maxBeams, maxBounce, mediumProp);
         sample.Render();
 
@@ -30,23 +30,7 @@ int main(int argc, char** argv) {
         float3 eye = make_float3(0, 0, -4);
         std::vector<Quad> quads(pBeams.size() * breakSize);
 
-        for (int i = 0; i < pBeams.size(); i++) {
-            float3 widthDir = normalize(cross(pBeams[i].start - eye, pBeams[i].end - pBeams[i].start));
-            float3 lengthDir = pBeams[i].end - pBeams[i].start;
-            
-            for (int j = 0; j < breakSize; j++) {
-                quads[i * breakSize + j].vertex.push_back(pBeams[i].start + j * lengthDir / breakSize + thickness * widthDir / 2.0f);
-                quads[i * breakSize + j].vertex.push_back(pBeams[i].start + j * lengthDir / breakSize - thickness * widthDir / 2.0f);
-                quads[i * breakSize + j].vertex.push_back(pBeams[i].start + (j + 1) * lengthDir / breakSize + thickness * widthDir / 2.0f);
-                quads[i * breakSize + j].vertex.push_back(pBeams[i].start + (j + 1) * lengthDir / breakSize - thickness * widthDir / 2.0f);
-                quads[i * breakSize + j].index.push_back(make_int3(0, 1, 2));
-                quads[i * breakSize + j].index.push_back(make_int3(3, 2, 1));
-                quads[i * breakSize + j].transmittance = pBeams[i].transmittance;
-                quads[i * breakSize + j].start = pBeams[i].start;
-            }
-        }
-
-        DisplayWindow* window = new DisplayWindow(quads, mediumProp);
+        DisplayWindow* window = new DisplayWindow(pBeams, mediumProp);
         window->run();
     }
     catch (std::runtime_error& e) {

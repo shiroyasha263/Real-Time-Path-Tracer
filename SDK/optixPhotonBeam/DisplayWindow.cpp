@@ -134,8 +134,7 @@ DisplayWindow::~DisplayWindow() {
     glfwTerminate();
 }
 
-DisplayWindow::DisplayWindow(const std::vector<Quad> &quads, float mediumProp)
-:sample(SampleRenderer(quads)) {
+DisplayWindow::DisplayWindow(const std::vector<PhotonBeam> &pBeams, float mediumProp) {
     handle = sutil::initUI("optixPathTracer", 1200, 800);
     launchParams.width = 1200;
     launchParams.height = 800;
@@ -144,21 +143,50 @@ DisplayWindow::DisplayWindow(const std::vector<Quad> &quads, float mediumProp)
     initCameraState();
     glfwSetWindowUserPointer(handle, this);
     glfwMakeContextCurrent(handle);
-    sample.updateParams(launchParams);
 
-    int perVertexFloat = 4;
-    int perQuadFloat = (3 + 1) * perVertexFloat;
+    int perQuadVertex = 4;
+    // vPos.x, vPos.y, vPos.z, pos/neg, dir.x, dir.y, dir.z, thickness, transmittance
+    int perVertexFloat = 3 + 1 + 3 + 1 + 1;
+    int perQuadFloat = perQuadVertex * perVertexFloat;
     int perQuadIndices = 6;
-    const int vertexCount = quads.size() * perQuadFloat;
+    const int vertexCount = pBeams.size() * perQuadFloat;
     vertices = std::vector<GLfloat>(vertexCount);
-    indices = std::vector<GLuint>(quads.size() * 6);
+    indices = std::vector<GLuint>(pBeams.size() * 6);
 
-    for (int i = 0; i < quads.size(); i++) {
+    for (int i = 0; i < pBeams.size(); i++) {
         for (int j = 0; j < 4; j++) {
-            vertices[i * perQuadFloat + j * perVertexFloat + 0] = (quads[i].vertex[j].x);
-            vertices[i * perQuadFloat + j * perVertexFloat + 1] = (quads[i].vertex[j].y);
-            vertices[i * perQuadFloat + j * perVertexFloat + 2] = (quads[i].vertex[j].z);
-            vertices[i * perQuadFloat + j * perVertexFloat + 3] = (quads[i].transmittance);
+            //Start point or end point
+            if (j < 2) {
+                vertices[i * perQuadFloat + j * perVertexFloat + 0] = (pBeams[i].start.x);
+                vertices[i * perQuadFloat + j * perVertexFloat + 1] = (pBeams[i].start.y);
+                vertices[i * perQuadFloat + j * perVertexFloat + 2] = (pBeams[i].start.z);
+            }
+            else {
+                vertices[i * perQuadFloat + j * perVertexFloat + 0] = (pBeams[i].end.x);
+                vertices[i * perQuadFloat + j * perVertexFloat + 1] = (pBeams[i].end.y);
+                vertices[i * perQuadFloat + j * perVertexFloat + 2] = (pBeams[i].end.z);
+            }
+
+            //vertices[i * perQuadFloat + j * perVertexFloat + 3] = (float)0.f;
+
+            //Direction plus or negative
+            if (j % 2 == 1)
+                vertices[i * perQuadFloat + j * perVertexFloat + 3] = 1.f;
+            else
+                vertices[i * perQuadFloat + j * perVertexFloat + 3] = -1.f;
+
+            //Direction of the beam
+            float3 beamDir = pBeams[i].end - pBeams[i].start;
+            vertices[i * perQuadFloat + j * perVertexFloat + 4] = beamDir.x;
+            vertices[i * perQuadFloat + j * perVertexFloat + 5] = beamDir.y;
+            vertices[i * perQuadFloat + j * perVertexFloat + 6] = beamDir.z;
+
+            //Thickness of the beam
+            float thickness = 0.15f;
+            vertices[i * perQuadFloat + j * perVertexFloat + 7] = thickness;
+
+            //Transmittance of the beam
+            vertices[i * perQuadFloat + j * perVertexFloat + 8] = pBeams[i].transmittance;
         }
         indices[i * perQuadIndices + 0] = (i * 4 + 0);
         indices[i * perQuadIndices + 1] = (i * 4 + 1);
@@ -191,8 +219,11 @@ void DisplayWindow::run() {
     VBO VBO1(vertices.data(), vertices.size() * sizeof(GLfloat));
     EBO EBO1(indices.data(), indices.size() * sizeof(GLuint));
 
-    VAO1.LinkAttrib(VBO1, 0, 3, GL_FLOAT, 4 * sizeof(float), (void*)0);
-    VAO1.LinkAttrib(VBO1, 1, 1, GL_FLOAT, 4 * sizeof(float), (void*)(3 * sizeof(float)));
+    VAO1.LinkAttrib(VBO1, 0, 3, GL_FLOAT, 9 * sizeof(float), (void*)0);
+    VAO1.LinkAttrib(VBO1, 1, 1, GL_FLOAT, 9 * sizeof(float), (void*)(3 * sizeof(float)));
+    VAO1.LinkAttrib(VBO1, 2, 3, GL_FLOAT, 9 * sizeof(float), (void*)(4 * sizeof(float)));
+    VAO1.LinkAttrib(VBO1, 3, 1, GL_FLOAT, 9 * sizeof(float), (void*)(7 * sizeof(float)));
+    VAO1.LinkAttrib(VBO1, 4, 1, GL_FLOAT, 9 * sizeof(float), (void*)(8 * sizeof(float)));
 
     VAO1.Unbind();
     VBO1.Unbind();
@@ -240,9 +271,9 @@ void DisplayWindow::run() {
         camera.updateMatrix(45.0f, 0.1f, 100.0f);
 
         shaderProgram.Activate();
-        //glUniform3f(glGetUniformLocation(shaderProgram.ID, "camPos"), camera.Position.x, camera.Position.y, camera.Position.z);
         // Export the camMatrix to the Vertex Shader of the pyramid
         camera.Matrix(shaderProgram, "camMatrix");
+        glUniform3f(glGetUniformLocation(shaderProgram.ID, "camPos"), camera.Position.x, camera.Position.y, camera.Position.z);
         // Bind the VAO so OpenGL knows to use it
         VAO1.Bind();
         // Draw primitives, number of indices, datatype of indices, index of indices
@@ -272,7 +303,6 @@ void DisplayWindow::render() {
 
 void DisplayWindow::draw(sutil::CUDAOutputBuffer<uchar4>& output_buffer, sutil::GLDisplay& gl_display) {
     uchar4* result_buffer_data = output_buffer.map();
-    sample.downloadPixels(result_buffer_data);
     output_buffer.unmap();
     int framebuf_res_x = 0;  // The display's resolution (could be HDPI res)
     int framebuf_res_y = 0;  //
