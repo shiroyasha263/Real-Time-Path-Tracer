@@ -45,14 +45,14 @@ extern "C" __global__ void __miss__radiance()
 extern "C" __global__ void __raygen__renderFrame()
 {
     if (optixGetLaunchIndex().x == 0 &&
-        optixGetLaunchIndex().y == 0) {
+        optixLaunchParams.seed % 1000 == 0) {
         // we could of course also have used optixGetLaunchDims to query
         // the launch size, but accessing the optixLaunchParams here
         // makes sure they're not getting optimized away (because
         // otherwise they'd not get used)
         printf("############################################\n");
         printf("Hello world from OptiX 7 raygen program!\n(within a %ix%i-sized launch)\n",
-            optixLaunchParams.maxBeams, 1);
+            optixLaunchParams.maxBeams, optixLaunchParams.seed);
         printf("############################################\n");
     }
     
@@ -66,24 +66,29 @@ extern "C" __global__ void __raygen__renderFrame()
     unsigned int seed = tea<4>(idx.x, launchSeed);
     //float3 start = make_float3(rnd(seed) * 2.f - 1.f, rnd(seed) * 2.f - 1.f, rnd(seed) * 2.f - 1.f) / 10.f;
     float3 start = make_float3(0.f, 0.f, 0.f);
-    float transmittance = 1.f;
-    float thickness = 0.01f;
+    float transmittance = 2.f;
+    float thickness = 0.5f;
     float mult = 1.f;
-    float alpha = 0.1f;
-    for (int j = 0; j < launchSeed; j++) {
+    float alpha = 0.05f;
+    for (int j = 0; j < launchSeed; j++)
         mult = mult * (j + alpha + 1) / (j + 1);
-    }
     mult = mult / (launchSeed + 1);
     thickness = thickness * mult;
     for (int i = 0; i < optixLaunchParams.maxBounce; i++) {
         optixLaunchParams.beams[idx.x * optixLaunchParams.maxBounce + i].transmittance = transmittance;
         optixLaunchParams.beams[idx.x * optixLaunchParams.maxBounce + i].start = start;
-        float3 dir = 2.0f * make_float3(rnd(seed), rnd(seed), rnd(seed)) - 1.0f;
-        dir = normalize(dir);
+        float3 dir;
+        do
+        {
+            dir.x = 2.f * rnd(seed) - 1.f;
+            dir.y = 2.f * rnd(seed) - 1.f;
+            dir.z = 2.f * rnd(seed) - 1.f;
+        } while (dir.x * dir.x + dir.y * dir.y + dir.z * dir.z > 1);
+        dir = dir / (dir.x * dir.x + dir.y * dir.y + dir.z * dir.z);
         float eta = rnd(seed);
         float t = (-1.0f * log(1 - eta)) / optixLaunchParams.materialProp;
         float3 end = start + t * dir;
-        optixLaunchParams.beams[idx.x * optixLaunchParams.maxBounce + i].end = end;
+        optixLaunchParams.beams[idx.x * optixLaunchParams.maxBounce + i].end = start + t * dir;
         optixLaunchParams.beams[idx.x * optixLaunchParams.maxBounce + i].thickness = thickness;
         start = end;
         transmittance = transmittance * exp(-t * optixLaunchParams.materialProp);

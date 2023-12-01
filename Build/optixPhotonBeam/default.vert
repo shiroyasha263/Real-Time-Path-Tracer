@@ -20,7 +20,7 @@ out vec3 crntPos;
 
 out float depth;
 
-out float width;
+out float alongLength;
 
 out float sine;
 
@@ -42,14 +42,12 @@ void main()
 	vec3 beamDir = crntEnd - crntStart;
 	crntPos = crntStart + PosMul * beamDir + dirMult * thickness * normalize(cross(crntStart - camPos, beamDir)) / 2.f;
 
-	vec3 alongBeam = crntPos - crntStart;
 	vec3 nBeamDir = normalize(beamDir);
-	vec3 projection = dot(alongBeam, nBeamDir) * nBeamDir;
 	vec3 w = normalize(crntPos - camPos);
 	sine = length(cross(w, nBeamDir));
 
-	width = length(cross(alongBeam, nBeamDir));
 	depth = length(crntPos - camPos);
+	alongLength = length(crntPos - crntStart);
 	thick = thickness;
 
 	// Outputs the positions/coordinates of all vertices

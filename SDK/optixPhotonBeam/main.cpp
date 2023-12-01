@@ -18,10 +18,10 @@ int main(int argc, char** argv) {
 
         std::vector<PhotonBeam> allBeams;
 
-        float mediumProp = 1.2f;
-        int maxBeams = 100000;
+        float mediumProp = 2.f;
+        int maxBeams = 20;
         int maxBounce = 2;
-        int maxPass = 10;
+        int maxPass = 25000;
 
         for (int i = 0; i < maxPass; i++) {
             sample.Resize(maxBeams, maxBounce, mediumProp, i);

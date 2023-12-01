@@ -11,7 +11,7 @@ in vec3 crntPos;
 
 in float depth;
 
-in float width;
+in float alongLength;
 
 in float sine;
 
@@ -37,12 +37,13 @@ void main()
 //	float specularLight = 0.50f;
 	vec3 viewDirection = normalize(camPos - crntPos);
 	float T = exp(-depth * 1.2f);
-	float k = 10.f;
+	//float Tb = exp(-alongLength * 1.2f);
+	float Tb = 1.f;
 //	vec3 reflectionDirection = reflect(-lightDirection, normal);
 //	float specAmount = pow(max(dot(viewDirection, reflectionDirection), 0.0f), 8);
 //	float specular = specAmount * specularLight;
 	float t = transmittance;
 
 	// outputs final color
-	FragColor = vec4(1.f, 1.f, 1.f, k * 1.2f * T * transmittance / (sine * Count));
+	FragColor = vec4(1.f, 1.f, 1.f, 1.2f * T * Tb * transmittance / (sine * Count * 2 * thick));
 }
