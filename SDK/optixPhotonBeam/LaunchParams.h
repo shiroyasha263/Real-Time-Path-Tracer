@@ -12,6 +12,7 @@ struct PhotonBeam {
 	float3 start;
 	float3 end;
 	float transmittance;
+	float thickness;
 };
 
 struct PhotonBeamParams {
@@ -19,6 +20,7 @@ struct PhotonBeamParams {
 	int maxBeams;
 	int maxBounce;
 	float materialProp;
+	int seed;
 };
 
 struct LaunchParams {

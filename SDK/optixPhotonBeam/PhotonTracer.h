@@ -15,7 +15,7 @@ public:
 	
 	void Render();
 
-	void Resize(int beamCount, int bounceCount, float mediumProp);
+	void Resize(int beamCount, int bounceCount, float mediumProp, int seed);
 
 	void GetBeams(PhotonBeam h_beams[]);
 

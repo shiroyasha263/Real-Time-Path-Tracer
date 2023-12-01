@@ -278,13 +278,14 @@ void PhotonTracer::Render() {
 	CUDA_SYNC_CHECK();
 }
 
-void PhotonTracer::Resize(int beamCount, int bounceCount, float mediumProp) {
+void PhotonTracer::Resize(int beamCount, int bounceCount, float mediumProp, int seed) {
 	if (beamCount == 0 || bounceCount == 0) return;
 	photonBeamParams.materialProp = mediumProp;
 	beams.resize(beamCount * bounceCount * sizeof(PhotonBeam));
 	photonBeamParams.maxBeams = beamCount;
 	photonBeamParams.maxBounce = bounceCount;
 	photonBeamParams.beams = (PhotonBeam*)beams.d_pointer();
+	photonBeamParams.seed = seed;
 }
 
 void PhotonTracer::GetBeams(PhotonBeam h_beams[]) {

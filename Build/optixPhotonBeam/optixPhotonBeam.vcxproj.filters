@@ -71,13 +71,17 @@
     <CustomBuild Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\SDK\optixPhotonBeam\CMakeLists.txt" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\SDK\optixPhotonBeam\default.frag" />
-    <None Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\SDK\optixPhotonBeam\default.vert" />
     <None Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\Build\lib\ptx\$(Configuration)\optixPhotonBeam_generated_devicePrograms.cu.optixir">
       <Filter>OptixIR Files</Filter>
     </None>
     <None Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\Build\lib\ptx\$(Configuration)\optixPhotonBeam_generated_PhotonTracer.cu.optixir">
       <Filter>OptixIR Files</Filter>
+    </None>
+    <None Include="default.frag">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="default.vert">
+      <Filter>Source Files</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

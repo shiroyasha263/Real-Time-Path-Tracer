@@ -1,15 +1,17 @@
 #version 330 core
 
-// Positions/Coordinates
-layout (location = 0) in vec3 beamSide;
+// Start
+layout (location = 0) in vec3 beamStart;
+// PosMul
+layout (location = 1) in float PosMul;
 // pos / neg
-layout (location = 1) in float dirMult;
+layout (location = 2) in float dirMult;
 // beamDir
-layout (location = 2) in vec3 beamDir;
+layout (location = 3) in vec3 beamEnd;
 // Thickness
-layout (location = 3) in float thickness;
+layout (location = 4) in float thickness;
 // Transmittance
-layout (location = 4) in float aTransmittance;
+layout (location = 5) in float aTransmittance;
 
 // Outputs the color for the Fragment Shader
 out float transmittance;
@@ -17,6 +19,12 @@ out float transmittance;
 out vec3 crntPos;
 
 out float depth;
+
+out float width;
+
+out float sine;
+
+out float thick;
 
 // Imports the camera matrix from the main function
 uniform mat4 camMatrix;
@@ -29,11 +37,21 @@ uniform vec3 camPos;
 void main()
 {
 	// calculates current position
-	vec3 aPos = beamSide + dirMult * thickness * normalize(cross(beamSide - camPos, beamDir)) / 2.f;
+	vec3 crntStart = vec3(model * vec4(beamStart, 1.f));
+	vec3 crntEnd = vec3(model * vec4(beamEnd, 1.f));
+	vec3 beamDir = crntEnd - crntStart;
+	crntPos = crntStart + PosMul * beamDir + dirMult * thickness * normalize(cross(crntStart - camPos, beamDir)) / 2.f;
 
-	depth = length(aPos - camPos);
+	vec3 alongBeam = crntPos - crntStart;
+	vec3 nBeamDir = normalize(beamDir);
+	vec3 projection = dot(alongBeam, nBeamDir) * nBeamDir;
+	vec3 w = normalize(crntPos - camPos);
+	sine = length(cross(w, nBeamDir));
 
-	crntPos = vec3(model * vec4(aPos, 1.0f));
+	width = length(cross(alongBeam, nBeamDir));
+	depth = length(crntPos - camPos);
+	thick = thickness;
+
 	// Outputs the positions/coordinates of all vertices
 	gl_Position = camMatrix * vec4(crntPos, 1.0);
 

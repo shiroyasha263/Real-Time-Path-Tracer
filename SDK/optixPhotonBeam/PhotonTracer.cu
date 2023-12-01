@@ -62,10 +62,19 @@ extern "C" __global__ void __raygen__renderFrame()
     
     // compute a test pattern based on pixel ID
     const uint3 idx = optixGetLaunchIndex();
-
-    unsigned int seed = tea<4>(idx.x, idx.y);
-    float3 start = make_float3(rnd(seed) * 2.f - 1.f, rnd(seed) * 2.f - 1.f, rnd(seed) * 2.f - 1.f) / 10.f;
+    int launchSeed = optixLaunchParams.seed;
+    unsigned int seed = tea<4>(idx.x, launchSeed);
+    //float3 start = make_float3(rnd(seed) * 2.f - 1.f, rnd(seed) * 2.f - 1.f, rnd(seed) * 2.f - 1.f) / 10.f;
+    float3 start = make_float3(0.f, 0.f, 0.f);
     float transmittance = 1.f;
+    float thickness = 0.01f;
+    float mult = 1.f;
+    float alpha = 0.1f;
+    for (int j = 0; j < launchSeed; j++) {
+        mult = mult * (j + alpha + 1) / (j + 1);
+    }
+    mult = mult / (launchSeed + 1);
+    thickness = thickness * mult;
     for (int i = 0; i < optixLaunchParams.maxBounce; i++) {
         optixLaunchParams.beams[idx.x * optixLaunchParams.maxBounce + i].transmittance = transmittance;
         optixLaunchParams.beams[idx.x * optixLaunchParams.maxBounce + i].start = start;
@@ -75,6 +84,7 @@ extern "C" __global__ void __raygen__renderFrame()
         float t = (-1.0f * log(1 - eta)) / optixLaunchParams.materialProp;
         float3 end = start + t * dir;
         optixLaunchParams.beams[idx.x * optixLaunchParams.maxBounce + i].end = end;
+        optixLaunchParams.beams[idx.x * optixLaunchParams.maxBounce + i].thickness = thickness;
         start = end;
         transmittance = transmittance * exp(-t * optixLaunchParams.materialProp);
     }

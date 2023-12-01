@@ -134,11 +134,12 @@ DisplayWindow::~DisplayWindow() {
     glfwTerminate();
 }
 
-DisplayWindow::DisplayWindow(const std::vector<PhotonBeam> &pBeams, float mediumProp) {
+DisplayWindow::DisplayWindow(const std::vector<PhotonBeam> &pBeams, float mediumProp, int perPassSample) {
     handle = sutil::initUI("optixPathTracer", 1200, 800);
     launchParams.width = 1200;
     launchParams.height = 800;
     launchParams.mediumProp = mediumProp;
+    fluxDivider = perPassSample;
     initWinParams();
     initCameraState();
     glfwSetWindowUserPointer(handle, this);
@@ -146,7 +147,7 @@ DisplayWindow::DisplayWindow(const std::vector<PhotonBeam> &pBeams, float medium
 
     int perQuadVertex = 4;
     // vPos.x, vPos.y, vPos.z, pos/neg, dir.x, dir.y, dir.z, thickness, transmittance
-    int perVertexFloat = 3 + 1 + 3 + 1 + 1;
+    int perVertexFloat = 3 + 1 + 1 + 3 + 1 + 1;
     int perQuadFloat = perQuadVertex * perVertexFloat;
     int perQuadIndices = 6;
     const int vertexCount = pBeams.size() * perQuadFloat;
@@ -155,38 +156,36 @@ DisplayWindow::DisplayWindow(const std::vector<PhotonBeam> &pBeams, float medium
 
     for (int i = 0; i < pBeams.size(); i++) {
         for (int j = 0; j < 4; j++) {
-            //Start point or end point
-            if (j < 2) {
-                vertices[i * perQuadFloat + j * perVertexFloat + 0] = (pBeams[i].start.x);
-                vertices[i * perQuadFloat + j * perVertexFloat + 1] = (pBeams[i].start.y);
-                vertices[i * perQuadFloat + j * perVertexFloat + 2] = (pBeams[i].start.z);
-            }
-            else {
-                vertices[i * perQuadFloat + j * perVertexFloat + 0] = (pBeams[i].end.x);
-                vertices[i * perQuadFloat + j * perVertexFloat + 1] = (pBeams[i].end.y);
-                vertices[i * perQuadFloat + j * perVertexFloat + 2] = (pBeams[i].end.z);
-            }
+            //Start point
+            vertices[i * perQuadFloat + j * perVertexFloat + 0] = (pBeams[i].start.x);
+            vertices[i * perQuadFloat + j * perVertexFloat + 1] = (pBeams[i].start.y);
+            vertices[i * perQuadFloat + j * perVertexFloat + 2] = (pBeams[i].start.z);
+
+            //Beamside Mult
+            if (j < 2)
+                vertices[i * perQuadFloat + j * perVertexFloat + 3] = 0.f;
+            else 
+                vertices[i * perQuadFloat + j * perVertexFloat + 3] = 1.f;
 
             //vertices[i * perQuadFloat + j * perVertexFloat + 3] = (float)0.f;
 
             //Direction plus or negative
             if (j % 2 == 1)
-                vertices[i * perQuadFloat + j * perVertexFloat + 3] = 1.f;
+                vertices[i * perQuadFloat + j * perVertexFloat + 4] = 1.f;
             else
-                vertices[i * perQuadFloat + j * perVertexFloat + 3] = -1.f;
+                vertices[i * perQuadFloat + j * perVertexFloat + 4] = -1.f;
 
             //Direction of the beam
-            float3 beamDir = pBeams[i].end - pBeams[i].start;
-            vertices[i * perQuadFloat + j * perVertexFloat + 4] = beamDir.x;
-            vertices[i * perQuadFloat + j * perVertexFloat + 5] = beamDir.y;
-            vertices[i * perQuadFloat + j * perVertexFloat + 6] = beamDir.z;
+            vertices[i * perQuadFloat + j * perVertexFloat + 5] = pBeams[i].end.x;
+            vertices[i * perQuadFloat + j * perVertexFloat + 6] = pBeams[i].end.y;
+            vertices[i * perQuadFloat + j * perVertexFloat + 7] = pBeams[i].end.z;
 
             //Thickness of the beam
-            float thickness = 0.01f;
-            vertices[i * perQuadFloat + j * perVertexFloat + 7] = thickness;
+            float thickness = 0.1f;
+            vertices[i * perQuadFloat + j * perVertexFloat + 8] = pBeams[i].thickness;
 
             //Transmittance of the beam
-            vertices[i * perQuadFloat + j * perVertexFloat + 8] = pBeams[i].transmittance;
+            vertices[i * perQuadFloat + j * perVertexFloat + 9] = pBeams[i].transmittance;
         }
         indices[i * perQuadIndices + 0] = (i * 4 + 0);
         indices[i * perQuadIndices + 1] = (i * 4 + 1);
@@ -219,11 +218,12 @@ void DisplayWindow::run() {
     VBO VBO1(vertices.data(), vertices.size() * sizeof(GLfloat));
     EBO EBO1(indices.data(), indices.size() * sizeof(GLuint));
 
-    VAO1.LinkAttrib(VBO1, 0, 3, GL_FLOAT, 9 * sizeof(float), (void*)0);
-    VAO1.LinkAttrib(VBO1, 1, 1, GL_FLOAT, 9 * sizeof(float), (void*)(3 * sizeof(float)));
-    VAO1.LinkAttrib(VBO1, 2, 3, GL_FLOAT, 9 * sizeof(float), (void*)(4 * sizeof(float)));
-    VAO1.LinkAttrib(VBO1, 3, 1, GL_FLOAT, 9 * sizeof(float), (void*)(7 * sizeof(float)));
-    VAO1.LinkAttrib(VBO1, 4, 1, GL_FLOAT, 9 * sizeof(float), (void*)(8 * sizeof(float)));
+    VAO1.LinkAttrib(VBO1, 0, 3, GL_FLOAT, 10 * sizeof(float), (void*)0);
+    VAO1.LinkAttrib(VBO1, 1, 1, GL_FLOAT, 10 * sizeof(float), (void*)(3 * sizeof(float)));
+    VAO1.LinkAttrib(VBO1, 2, 1, GL_FLOAT, 10 * sizeof(float), (void*)(4 * sizeof(float)));
+    VAO1.LinkAttrib(VBO1, 3, 3, GL_FLOAT, 10 * sizeof(float), (void*)(5 * sizeof(float)));
+    VAO1.LinkAttrib(VBO1, 4, 1, GL_FLOAT, 10 * sizeof(float), (void*)(8 * sizeof(float)));
+    VAO1.LinkAttrib(VBO1, 5, 1, GL_FLOAT, 10 * sizeof(float), (void*)(9 * sizeof(float)));
 
     VAO1.Unbind();
     VBO1.Unbind();
@@ -235,6 +235,7 @@ void DisplayWindow::run() {
 
     shaderProgram.Activate();
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram.ID, "model"), 1, GL_FALSE, glm::value_ptr(beamModel));
+    glUniform1i(glGetUniformLocation(shaderProgram.ID, "Count"), fluxDivider);
     //glUniform4f(glGetUniformLocation(shaderProgram.ID, "lightColor"), 1.f, 1.f, 1.f, 1.f);
 
     //glEnable(GL_DEPTH_TEST);
@@ -243,7 +244,7 @@ void DisplayWindow::run() {
     glEnable(GL_BLEND);
     //glBlendFunc(GL_SRC_ALPHA, GL_ONE);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    Camera camera(width, height, glm::vec3(0.f, 0.f, 4.f));
+    Camera camera(width, height, glm::vec3(0.f, 0.f, 1.f));
 
     //sutil::CUDAOutputBuffer<uchar4> output_buffer(
     //    sutil::CUDAOutputBufferType::GL_INTEROP,

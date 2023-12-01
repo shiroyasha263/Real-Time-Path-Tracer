@@ -487,10 +487,6 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
-    <None Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\SDK\optixPhotonBeam\default.frag">
-    </None>
-    <None Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\SDK\optixPhotonBeam\default.vert">
-    </None>
     <ClInclude Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\SDK\optixPhotonBeam\EBO.h" />
     <ClInclude Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\SDK\optixPhotonBeam\VBO.h" />
     <ClInclude Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\SDK\optixPhotonBeam\VAO.h" />
@@ -514,6 +510,8 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     </None>
     <None Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\Build\lib\ptx\$(Configuration)\optixPhotonBeam_generated_PhotonTracer.cu.optixir">
     </None>
+    <None Include="default.frag" />
+    <None Include="default.vert" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\Build\ZERO_CHECK.vcxproj">

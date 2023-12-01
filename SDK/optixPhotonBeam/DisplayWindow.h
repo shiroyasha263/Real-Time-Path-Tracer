@@ -16,7 +16,7 @@
 #include "SampleRenderer.h"
 
 struct DisplayWindow {
-	DisplayWindow(const std::vector<PhotonBeam> &pBeams, float mediumProp);
+	DisplayWindow(const std::vector<PhotonBeam> &pBeams, float mediumProp, int perPassSamples);
 	~DisplayWindow();
 
     /*! put pixels on the screen ... */
@@ -74,6 +74,8 @@ struct DisplayWindow {
     std::vector<GLuint> indices;
     std::vector<GLfloat> vertices;
     std::vector<PhotonBeam> beams;
+
+    int fluxDivider;
 
     bool resize_dirty;
 

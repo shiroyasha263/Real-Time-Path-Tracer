@@ -16,21 +16,23 @@ int main(int argc, char** argv) {
     try {
         PhotonTracer sample;
 
-        int maxBeams = 10000;
-        int maxBounce = 1;
-        float mediumProp = 2.f;
-        sample.Resize(maxBeams, maxBounce, mediumProp);
-        sample.Render();
+        std::vector<PhotonBeam> allBeams;
 
-        std::vector<PhotonBeam> pBeams(maxBeams * maxBounce);
-        sample.GetBeams(pBeams.data());
+        float mediumProp = 1.2f;
+        int maxBeams = 100000;
+        int maxBounce = 2;
+        int maxPass = 10;
 
-        float thickness = 0.15f;
-        size_t breakSize = 1;
-        float3 eye = make_float3(0, 0, -4);
-        std::vector<Quad> quads(pBeams.size() * breakSize);
+        for (int i = 0; i < maxPass; i++) {
+            sample.Resize(maxBeams, maxBounce, mediumProp, i);
+            sample.Render();
 
-        DisplayWindow* window = new DisplayWindow(pBeams, mediumProp);
+            std::vector<PhotonBeam> pBeams(maxBeams * maxBounce);
+            sample.GetBeams(pBeams.data());
+            allBeams.insert(allBeams.end(), pBeams.begin(), pBeams.end());
+        }
+
+        DisplayWindow* window = new DisplayWindow(allBeams, mediumProp, maxBeams * maxPass);
         window->run();
     }
     catch (std::runtime_error& e) {
