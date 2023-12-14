@@ -16,7 +16,7 @@
 #include "SampleRenderer.h"
 
 struct DisplayWindow {
-	DisplayWindow(const std::vector<Quad> &quads, float mediumProp);
+	DisplayWindow(const std::vector<PhotonBeam> &pBeams, float mediumProp, int perPassSamples);
 	~DisplayWindow();
 
     /*! put pixels on the screen ... */
@@ -27,7 +27,6 @@ struct DisplayWindow {
         /* empty - to be subclassed by user */
         launchParams.width = width;
         launchParams.height = height;
-        sample.updateParams(launchParams);
     }
 
     inline int2 getMousePos() const
@@ -71,7 +70,12 @@ struct DisplayWindow {
     /*! the glfw window handle */
     GLFWwindow* handle{ nullptr };
     LaunchParams launchParams;
-    SampleRenderer sample;
+
+    std::vector<GLuint> indices;
+    std::vector<GLfloat> vertices;
+    std::vector<PhotonBeam> beams;
+
+    int fluxDivider;
 
     bool resize_dirty;
 

@@ -1,6 +1,21 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="16.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+    <ClCompile Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\SDK\optixPhotonBeam\EBO.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\SDK\optixPhotonBeam\VBO.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\SDK\optixPhotonBeam\VAO.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\SDK\optixPhotonBeam\Camera.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\SDK\optixPhotonBeam\shaderClass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\SDK\optixPhotonBeam\SampleRenderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -15,6 +30,21 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\SDK\optixPhotonBeam\EBO.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\SDK\optixPhotonBeam\VBO.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\SDK\optixPhotonBeam\VAO.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\SDK\optixPhotonBeam\Camera.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\SDK\optixPhotonBeam\shaderClass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\SDK\optixPhotonBeam\CUDABuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -41,6 +71,8 @@
     <CustomBuild Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\SDK\optixPhotonBeam\CMakeLists.txt" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\SDK\optixPhotonBeam\default.frag" />
+    <None Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\SDK\optixPhotonBeam\default.vert" />
     <None Include="C:\Users\Vishu\Downloads\Real Time Path Tracer\Build\lib\ptx\$(Configuration)\optixPhotonBeam_generated_devicePrograms.cu.optixir">
       <Filter>OptixIR Files</Filter>
     </None>
