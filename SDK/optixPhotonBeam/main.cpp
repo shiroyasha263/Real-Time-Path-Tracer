@@ -20,7 +20,7 @@ int main(int argc, char** argv) {
 
         float mediumProp = 2.f;
         int maxBeams = 20;
-        int maxBounce = 2;
+        int maxBounce = 1;
         int maxPass = 25000;
 
         for (int i = 0; i < maxPass; i++) {

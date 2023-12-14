@@ -37,8 +37,6 @@ extern "C" __global__ void __miss__radiance()
 { /*! for this simple example, this will remain empty */
 }
 
-
-
 //------------------------------------------------------------------------------
 // ray gen program - the actual rendering happens in here
 //------------------------------------------------------------------------------
@@ -67,9 +65,9 @@ extern "C" __global__ void __raygen__renderFrame()
     //float3 start = make_float3(rnd(seed) * 2.f - 1.f, rnd(seed) * 2.f - 1.f, rnd(seed) * 2.f - 1.f) / 10.f;
     float3 start = make_float3(0.f, 0.f, 0.f);
     float transmittance = 2.f;
-    float thickness = 0.5f;
+    float thickness = 0.01f;
     float mult = 1.f;
-    float alpha = 0.05f;
+    float alpha = 0.1f;
     for (int j = 0; j < launchSeed; j++)
         mult = mult * (j + alpha + 1) / (j + 1);
     mult = mult / (launchSeed + 1);
@@ -77,14 +75,11 @@ extern "C" __global__ void __raygen__renderFrame()
     for (int i = 0; i < optixLaunchParams.maxBounce; i++) {
         optixLaunchParams.beams[idx.x * optixLaunchParams.maxBounce + i].transmittance = transmittance;
         optixLaunchParams.beams[idx.x * optixLaunchParams.maxBounce + i].start = start;
-        float3 dir;
-        do
-        {
-            dir.x = 2.f * rnd(seed) - 1.f;
-            dir.y = 2.f * rnd(seed) - 1.f;
-            dir.z = 2.f * rnd(seed) - 1.f;
-        } while (dir.x * dir.x + dir.y * dir.y + dir.z * dir.z > 1);
-        dir = dir / (dir.x * dir.x + dir.y * dir.y + dir.z * dir.z);
+        float u = 2.f * rnd(seed) - 1.f;
+        float v = 2.f * rnd(seed) - 1.f;
+        float theta = M_PI / 2.f + M_PI * pow(u, 3);
+        float phi = (M_PI + M_PI * pow(v, 3)) / 2.f;
+        float3 dir = make_float3(cos(theta) * sin(phi), sin(theta) * sin(phi), cos(phi));
         float eta = rnd(seed);
         float t = (-1.0f * log(1 - eta)) / optixLaunchParams.materialProp;
         float3 end = start + t * dir;
